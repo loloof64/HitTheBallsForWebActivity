@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+    <!ENTITY fill_color "#FFFFFF">
+    <!ENTITY stroke_color "#010101">
+]>
+
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="56"
+   height="56"
+>
+  <circle cx="28" cy="28" r="27" stroke="&stroke_color;" fill="&fill_color;" />
+  <text
+	font-size="14px" font-style="normal" font-weight="normal" line-height="125%" letter-spacing="0px" word-spacing="0px" fill="&stroke_color;" fill-opacity="1" stroke="none" font-family="Sans"
+       x="13"
+       y="31"
+    >1+2</text>
+</svg>
