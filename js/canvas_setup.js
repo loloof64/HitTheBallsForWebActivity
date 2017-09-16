@@ -1,20 +1,32 @@
-function buildCanvas() {
-    function computeToolbarHeight() {
-        var toolbarHeightProperty = window
-            .getComputedStyle(document.getElementById("main-toolbar"), null)
-            .getPropertyValue("height");
+function buildCanvasClass() {
 
-        var toolbarHeight = parseInt(toolbarHeightProperty.
-            slice(0, toolbarHeightProperty.length - 2));
+    function buildCanvasStage() {
+        function computeToolbarHeight() {
+            var toolbarHeightProperty = window
+                .getComputedStyle(document.getElementById("main-toolbar"), null)
+                .getPropertyValue("height");
 
-        return toolbarHeight;
+            var toolbarHeight = parseInt(toolbarHeightProperty.
+                slice(0, toolbarHeightProperty.length - 2));
+
+            return toolbarHeight;
+        }
+
+        var stage = new Konva.Stage({
+            container: 'canvas',
+            width: window.innerWidth,
+            height: window.innerHeight - computeToolbarHeight()
+        });
+
+        return stage;
     }
 
-    var stage = new Konva.Stage({
-        container: 'canvas',
-        width: window.innerWidth,
-        height: window.innerHeight - computeToolbarHeight()
-    });
+    return new Class({
+        initialize: function () {
+            this.stage = buildCanvasStage();
+            this.layer = new Konva.Layer();
 
-    return stage;
+            this.stage.add(this.layer);
+        }
+    });
 }
