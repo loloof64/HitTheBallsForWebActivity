@@ -1,127 +1,114 @@
-function buildCanvasClass() {
+var Canvas = function () {
 
-    function buildCanvasStage() {
-        function computeToolbarHeight() {
-            var toolbarHeightProperty = window
-                .getComputedStyle(document.getElementById("main-toolbar"), null)
-                .getPropertyValue("height");
+    var computeToolbarHeight = function () {
+        var toolbarHeightProperty = window
+            .getComputedStyle(document.getElementById("main-toolbar"), null)
+            .getPropertyValue("height");
 
-            var toolbarHeight = parseInt(toolbarHeightProperty.
-                slice(0, toolbarHeightProperty.length - 2));
+        var toolbarHeight = parseInt(toolbarHeightProperty.
+            slice(0, toolbarHeightProperty.length - 2));
 
-            return toolbarHeight;
-        }
+        return toolbarHeight;
+    };
 
-        var stage = new Konva.Stage({
-            container: 'canvas',
-            width: window.innerWidth,
-            height: window.innerHeight - computeToolbarHeight()
-        });
+    var nativeCanvas = document.getElementById("canvas");
+    nativeCanvas.width = window.innerWidth;
+    nativeCanvas.height = window.innerHeight - computeToolbarHeight();
 
-        return stage;
+    this.canvas = oCanvas.create({
+        canvas: nativeCanvas,
+        background: "#FFFFFF",
+        fps: 60
+    });
+
+    this.getNativeCanvas = function () {
+        return this.canvas;
     }
 
-    return oo.createClass({
-        _create: function () {
-            this.stage = buildCanvasStage();
-            this.layer = new Konva.Layer();
+    this.update = function () {
+        this.canvas.draw.redraw();
+    };
+};
 
-            this.stage.add(this.layer);
-        },
+var Group = function (objectsArray) {
+    this.objects = objectsArray;
+    this.moveTo = function (px, py) {
+        var baseObject = this.objects[0];
+        var deltaX = px - baseObject.x;
+        var deltaY = py - baseObject.y;
 
-        getStage: function () {
-            return this.stage;
-        },
-
-        getLayer: function () {
-            return this.layer;
+        for (var currentIndex in this.objects) {
+            var currentObject = this.objects[currentIndex];
+            currentObject.x += deltaX;
+            currentObject.y += deltaY;
         }
-    });
+    };
 }
 
-function buildBalloonBuilder() {
-    return oo.createClass({
-        _create: function () {
-            this.x = 0;
-            this.y = 0;
-            this.radius = 0;
-            this.text = "";
-            this.backgroundColor = 'white';
-            this.foregroundColor = 'black';
-            this.textSizeRatio = 0.1; // ratio textSize / radius
-            this.textXRatio = 0.1; // ratio textX / radius
-            this.textYRatio = 0.1; // ratio textY / radius
-        },
+var BalloonBuilder = function (canvas) {
+    this.canvas = canvas;
+    this.x = 0;
+    this.y = 0;
+    this.text = "";
+    this.fontSize = 16;
+    this.backgroundColor = 'white';
+    this.foregroundColor = 'black';
 
-        setLocation: function (x, y) {
-            this.x = x;
-            this.y = y;
-            return this;
-        },
+    this.setLocation = function (x, y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
 
-        setRadius: function (radius) {
-            this.radius = radius;
-            return this;
-        },
+    this.setText = function (text) {
+        this.text = text;
+        return this;
+    }
 
-        setText: function (text) {
-            this.text = text;
-            return this;
-        },
+    this.setBackgroundColor = function (backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        return this;
+    }
 
-        setBackgroundColor: function (backgroundColor) {
-            this.backgroundColor = backgroundColor;
-            return this;
-        },
+    this.setForegroundColor = function (foregroundColor) {
+        this.foregroundColor = foregroundColor;
+        return this;
+    }
 
-        setForegroundColor: function (foregroundColor) {
-            this.foregroundColor = foregroundColor;
-            return this;
-        },
+    this.setFontSize = function (size) {
+        this.fontSize = size;
+        return this;
+    }
 
-        // ratio textSize / radius
-        setTextSizeRatio(ratio) {
-            this.textSizeRatio = ratio;
-            return this;
-        },
+    this.build = function () {
+        var numChars = this.text.length;
 
-        // ratio textX / radius
-        setTextXRatio(ratio) {
-            this.textXRatio = ratio;
-            return this;
-        },
+        var text = this.canvas.getNativeCanvas().display.text({
+            text: this.text,
+            x: this.x,
+            y: this.y,
+            font: "bold " + this.fontSize + "px sans-serif",
+            fill: this.foregroundColor,
+        });
 
-        // ratio textY / radius
-        setTextYRatio(ratio) {
-            this.textYRatio = ratio;
-            return this;
-        },
+        var circle = this.canvas.getNativeCanvas().display.ellipse({
+            x: this.x,
+            y: this.y,
+            origin: { x: "left", y: "top" },
+            radius: 30,
+            fill: this.backgroundColor
+        });
 
-        build: function () {
-            var group = new Konva.Group({
-                x: this.x,
-                y: this.y
-            });
+        var textMaxDimension = text.width > text.height ? text.width : text.height;
+        var computedRadius = parseInt(textMaxDimension * 0.6);
+        circle.radius = computedRadius;
 
-            var circle = new Konva.Circle({
-                x: this.radius,
-                y: this.radius,
-                radius: this.radius,
-                fill: this.backgroundColor
-            });
+        text.x = parseInt(this.x + (2 * computedRadius - text.width) * 0.5);
+        text.y = parseInt(this.y + (2 * computedRadius - text.height) * 0.5);
 
-            var text = new Konva.Text({
-                x: parseInt(this.radius * this.textXRatio),
-                y: parseInt(this.radius * this.textYRatio),
-                text: this.text,
-                fontSize: parseInt(this.radius * this.textSizeRatio),
-                fill: this.foregroundColor
-            });
+        this.canvas.getNativeCanvas().addChild(circle);
+        this.canvas.getNativeCanvas().addChild(text);
 
-            group.add(circle);
-            group.add(text);
-
-            return group;
-        }
-    });
+        return new Group([circle, text]);
+    }
 }
